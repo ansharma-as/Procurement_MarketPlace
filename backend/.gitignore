@@ -1,0 +1,9 @@
+.env
+
+postman-collections
+
+documentation
+
+dist/
+
+node_modules
