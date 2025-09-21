@@ -100,7 +100,7 @@ const VendorPage = () => {
         }
       });
       console.log('Vendor Proposals API Response:', response.data);
-      setProposals(response.data.data?.data || []);
+      setProposals(response.data.data?.proposals || []);
     } catch (err) {
       console.error('Error fetching proposals:', err);
       setError('Failed to load proposals');
@@ -342,17 +342,54 @@ const VendorPage = () => {
   const submitExistingProposal = async (proposalId) => {
     try {
       setLoading(true);
+      setError('');
+
+      const authHeaders = getAuthHeaders();
+      console.log('Submitting proposal ID:', proposalId);
+      console.log('Auth headers:', authHeaders);
+      console.log('API URL:', `http://localhost:8080/api/proposals/${proposalId}/submit`);
+      console.log('Vendor token from localStorage:', localStorage.getItem('vendor_token'));
+
+      // Add Content-Type header explicitly for PATCH requests
+      const headers = {
+        'Content-Type': 'application/json',
+        ...authHeaders
+      };
+
+      console.log('Final headers being sent:', headers);
+
       const response = await axios.patch(
         `http://localhost:8080/api/proposals/${proposalId}/submit`,
         {},
-        { headers: getAuthHeaders() }
+        { headers }
       );
       console.log('Proposal Submitted API Response:', response.data);
       setSuccess('Proposal submitted successfully!');
       fetchProposals();
     } catch (err) {
       console.error('Error submitting proposal:', err);
-      setError('Failed to submit proposal');
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status,
+        headers: err.response?.headers,
+        config: err.config
+      });
+
+      // Check specific error types
+      if (err.response?.status === 401) {
+        setError('Authentication failed. Please login again.');
+        localStorage.removeItem('vendor_token');
+        navigate('/auth');
+      } else if (err.response?.status === 403) {
+        setError('You do not have permission to perform this action.');
+      } else if (err.response?.status === 404) {
+        setError('Proposal not found or URL is incorrect.');
+      } else if (err.response?.status === 405) {
+        setError('Method not allowed. Server may not support PATCH requests.');
+      } else {
+        setError('Failed to submit proposal: ' + (err.response?.data?.message || err.message));
+      }
     } finally {
       setLoading(false);
     }
@@ -361,17 +398,58 @@ const VendorPage = () => {
   // Withdraw proposal (PATCH /proposals/:id/withdraw)
   const withdrawProposal = async (proposalId, reason = 'Withdrawn by vendor') => {
     try {
+      setLoading(true);
+      setError('');
+
+      const authHeaders = getAuthHeaders();
+      console.log('Withdrawing proposal ID:', proposalId);
+      console.log('Withdraw reason:', reason);
+      console.log('Auth headers:', authHeaders);
+      console.log('API URL:', `http://localhost:8080/api/proposals/${proposalId}/withdraw`);
+      console.log('Vendor token from localStorage:', localStorage.getItem('vendor_token'));
+
+      // Add Content-Type header explicitly for PATCH requests
+      const headers = {
+        'Content-Type': 'application/json',
+        ...authHeaders
+      };
+
+      console.log('Final headers being sent:', headers);
+
       const response = await axios.patch(
         `http://localhost:8080/api/proposals/${proposalId}/withdraw`,
         { reason },
-        { headers: getAuthHeaders() }
+        { headers }
       );
       console.log('Proposal Withdrawn API Response:', response.data);
       setSuccess('Proposal withdrawn successfully!');
       fetchProposals();
     } catch (err) {
       console.error('Error withdrawing proposal:', err);
-      setError('Failed to withdraw proposal');
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status,
+        headers: err.response?.headers,
+        config: err.config
+      });
+
+      // Check specific error types
+      if (err.response?.status === 401) {
+        setError('Authentication failed. Please login again.');
+        localStorage.removeItem('vendor_token');
+        navigate('/auth');
+      } else if (err.response?.status === 403) {
+        setError('You do not have permission to perform this action.');
+      } else if (err.response?.status === 404) {
+        setError('Proposal not found or URL is incorrect.');
+      } else if (err.response?.status === 405) {
+        setError('Method not allowed. Server may not support PATCH requests.');
+      } else {
+        setError('Failed to withdraw proposal: ' + (err.response?.data?.message || err.message));
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -419,8 +497,8 @@ const VendorPage = () => {
     setSuccess('');
 
     fetchOpportunities();
-    const token = localStorage.getItem('token');
-    if (token) {
+    const vendorToken = localStorage.getItem('vendor_token');
+    if (vendorToken) {
       fetchProposals();
       fetchDashboard();
       fetchVendorProfile();
@@ -602,6 +680,17 @@ const VendorPage = () => {
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900">{proposal.proposedItem}</h3>
                         <p className="text-gray-600">{proposal.description}</p>
+                        {proposal.marketRequest && (
+                          <div className="text-sm text-blue-600 mt-1">
+                            <p>Market Request: {proposal.marketRequest.title}</p>
+                            <p>Status: {proposal.marketRequest.status} | Deadline: {formatDate(proposal.marketRequest.deadline)}</p>
+                            {proposal.marketRequest.daysUntilDeadline !== undefined && (
+                              <p className={`${proposal.marketRequest.daysUntilDeadline < 7 ? 'text-red-600' : 'text-blue-600'}`}>
+                                {proposal.marketRequest.daysUntilDeadline} days until deadline
+                              </p>
+                            )}
+                          </div>
+                        )}
                       </div>
                       <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                         proposal.status === 'accepted' ? 'bg-green-100 text-green-800' :
@@ -624,7 +713,7 @@ const VendorPage = () => {
                       </div>
                       <div>
                         <span className="text-gray-500">Total Price:</span>
-                        <div className="font-medium">{formatCurrency(proposal.unitPrice * proposal.quantity)}</div>
+                        <div className="font-medium">{formatCurrency(proposal.totalPrice || (proposal.unitPrice * proposal.quantity))}</div>
                       </div>
                       <div>
                         <span className="text-gray-500">Delivery:</span>
@@ -635,10 +724,81 @@ const VendorPage = () => {
                         <div className="font-medium">{formatDate(proposal.createdAt)}</div>
                       </div>
                       <div>
-                        <span className="text-gray-500">Score:</span>
-                        <div className="font-medium">{proposal.evaluationScore || 'Not scored'}</div>
+                        <span className="text-gray-500">Evaluation:</span>
+                        <div className="font-medium">
+                          {proposal.evaluation?.percentageScore
+                            ? `${proposal.evaluation.percentageScore}% (Manual)`
+                            : proposal.aiEvaluation?.overallScore
+                              ? `${proposal.aiEvaluation.overallScore.toFixed(1)}/100 (AI)`
+                              : 'Not evaluated'
+                          }
+                        </div>
                       </div>
                     </div>
+
+                    {/* AI Evaluation Display */}
+                    {proposal.aiEvaluation && proposal.aiEvaluation.overallScore && (
+                      <div className="bg-purple-50 p-4 rounded-lg mb-4">
+                        <h4 className="font-semibold text-purple-900 mb-2">🤖 AI Evaluation Results</h4>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+                          <div className="text-center">
+                            <div className="text-sm text-purple-700">Cost Score</div>
+                            <div className="font-bold text-purple-900">{proposal.aiEvaluation.costScore}/100</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-sm text-purple-700">Delivery Score</div>
+                            <div className="font-bold text-purple-900">{proposal.aiEvaluation.deliveryScore}/100</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-sm text-purple-700">Compliance Score</div>
+                            <div className="font-bold text-purple-900">{proposal.aiEvaluation.complianceScore}/100</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-sm text-purple-700">Overall Score</div>
+                            <div className="font-bold text-purple-900">{proposal.aiEvaluation.overallScore.toFixed(1)}/100</div>
+                          </div>
+                        </div>
+                        {proposal.aiEvaluation.insights?.recommendation && (
+                          <div className="bg-white p-3 rounded border">
+                            <div className="text-sm text-purple-700 font-medium">AI Recommendation:</div>
+                            <div className="text-sm text-gray-700 mt-1">{proposal.aiEvaluation.insights.recommendation}</div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Manual Evaluation Display */}
+                    {proposal.evaluation?.scores && proposal.evaluation.scores.length > 0 && (
+                      <div className="bg-blue-50 p-4 rounded-lg mb-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">📊 Manual Evaluation Results</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                          {proposal.evaluation.scores.map((score, index) => (
+                            <div key={index} className="bg-white p-3 rounded border">
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm font-medium text-blue-900">{score.criterion}</span>
+                                <span className="font-bold text-blue-900">{score.score}/{score.maxScore}</span>
+                              </div>
+                              {score.notes && (
+                                <div className="text-xs text-gray-600 mt-1">{score.notes}</div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                        <div className="text-center">
+                          <span className="text-sm text-blue-700">Total Score: </span>
+                          <span className="font-bold text-blue-900">
+                            {proposal.evaluation.totalScore}/{proposal.evaluation.maxTotalScore}
+                            ({proposal.evaluation.percentageScore}%)
+                          </span>
+                        </div>
+                        {proposal.evaluation.overallNotes && (
+                          <div className="bg-white p-3 rounded border mt-3">
+                            <div className="text-sm text-blue-700 font-medium">Evaluator Notes:</div>
+                            <div className="text-sm text-gray-700 mt-1">{proposal.evaluation.overallNotes}</div>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {/* Action buttons */}
                     <div className="flex gap-2 flex-wrap">
@@ -668,7 +828,13 @@ const VendorPage = () => {
                           </button>
                           <button
                             className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700"
-                            onClick={() => submitExistingProposal(proposal._id)}
+                            onClick={() => {
+                              console.log('Submit button clicked for proposal:', proposal._id);
+                              console.log('Proposal status:', proposal.status);
+                              if (window.confirm('Are you sure you want to submit this proposal?')) {
+                                submitExistingProposal(proposal._id);
+                              }
+                            }}
                           >
                             Submit
                           </button>

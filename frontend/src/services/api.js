@@ -136,7 +136,8 @@ export const vendorAPI = {
   getAll: (params) => api.get('/vendors', { params }),
   getById: (id) => api.get(`/vendors/${id}`),
   getDashboard: () => api.get('/vendors/dashboard'),
-  updateProfile: (data) => api.put('/vendors/profile', data),
+  getProposals: (params) => api.get('/vendors/proposals', { params }),
+  updateProfile: (id, data) => api.put(`/vendors/${id}`, data),
   getProfile: () => api.get('/vendors/profile'),
 };
 

@@ -1,0 +1,1513 @@
+{
+	"info": {
+		"_postman_id": "affa6cfc-a3a4-44a4-8a0e-0245611f9f4f",
+		"name": "Procurement Automation Platform API",
+		"description": "Complete API collection for the new procurement automation platform with organization-based workflow",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "42519663"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Create Organization & Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.to.have.status(201)) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('organization_id', response.data.organization._id);",
+									"    pm.collectionVariables.set('user_id', response.data.user._id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"organization\": {\n    \"name\": \"TechCorp Solutions\",\n    \"industry\": \"Technology\",\n    \"description\": \"Leading technology solutions provider\",\n    \"address\": {\n      \"street\": \"123 Tech Street\",\n      \"city\": \"San Francisco\",\n      \"state\": \"CA\",\n      \"zipCode\": \"94105\",\n      \"country\": \"USA\"\n    },\n    \"contact\": {\n      \"email\": \"info@techcorp.com\",\n      \"phone\": \"+1-555-0123\",\n      \"website\": \"https://techcorp.com\"\n    },\n    \"registrationNumber\": \"TC2024001\",\n    \"taxId\": \"12-3456789\"\n  },\n  \"admin\": {\n    \"firstName\": \"John\",\n    \"lastName\": \"Admin\",\n    \"email\": \"admin@techcorp.com\",\n    \"password\": \"SecurePass123!\",\n    \"phone\": \"+1-555-0124\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/organization/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"organization",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register Vendor",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.to.have.status(201)) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('vendor_id', response.data.vendor._id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Sarah\",\n  \"lastName\": \"Vendor\",\n  \"email\": \"sarah@supplier.com\",\n  \"password\": \"VendorPass123!\",\n  \"phone\": \"+1-555-0200\",\n  \"specialization\": [\"Electronics\", \"Hardware\"],\n  \"location\": \"New York, NY\",\n  \"portfolio\": \"Specialized in high-quality electronic components and hardware solutions\",\n  \"description\": \"5+ years experience in B2B electronics supply\",\n  \"certifications\": [\n    {\n      \"name\": \"ISO 9001\",\n      \"issuedBy\": \"ISO\",\n      \"issuedDate\": \"2023-01-15T00:00:00.000Z\",\n      \"expiryDate\": \"2026-01-15T00:00:00.000Z\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/vendor/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"vendor",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register Manager/User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Mike\",\n  \"lastName\": \"Manager\",\n  \"email\": \"manager@techcorp.com\",\n  \"password\": \"ManagerPass123!\",\n  \"role\": \"manager\",\n  \"organization\": \"{{organization_id}}\",\n  \"phone\": \"+1-555-0125\",\n  \"department\": \"Procurement\",\n  \"permissions\": [\"approve_requests\", \"create_market_requests\", \"view_analytics\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.to.have.status(200)) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('access_token', response.data.accessToken);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@techcorp.com\",\n  \"password\": \"SecurePass123!\",\n  \"userType\": \"user\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login Manager",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Cookie",
+								"value": "accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGNlOWNmYzBiZmI0MGM3NjcxNWViNzIiLCJlbWFpbCI6ImFkbWluQHRlY2hjb3JwLmNvbSIsInVzZXJUeXBlIjoidXNlciIsInJvbGUiOiJhZG1pbiIsIm9yZ2FuaXphdGlvbklkIjoie1xuICBfaWQ6IG5ldyBPYmplY3RJZCgnNjhjZTljZmMwYmZiNDBjNzY3MTVlYjZmJyksXG4gIG5hbWU6ICdUZWNoQ29ycCBTb2x1dGlvbnMnLFxuICBpbmR1c3RyeTogJ1RlY2hub2xvZ3knLFxuICBpc0FjdGl2ZTogdHJ1ZSxcbiAgaXNWZXJpZmllZDogZmFsc2UsXG4gIGlkOiAnNjhjZTljZmMwYmZiNDBjNzY3MTVlYjZmJ1xufSIsImlhdCI6MTc1ODM4NjIyMiwiZXhwIjoxNzU4OTkxMDIyLCJhdWQiOiJwcm9jdXJlbWVudC1wbGF0Zm9ybS11c2VycyIsImlzcyI6InByb2N1cmVtZW50LXBsYXRmb3JtIn0.ajd9oWrwBMm8sfole4ZBOaQfv_kwqveNK9DFVTE5REs; refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGNlOWNmYzBiZmI0MGM3NjcxNWViNzIiLCJlbWFpbCI6ImFkbWluQHRlY2hjb3JwLmNvbSIsInVzZXJUeXBlIjoidXNlciIsImlhdCI6MTc1ODM4NjIyMiwiZXhwIjoxNzYwOTc4MjIyLCJhdWQiOiJwcm9jdXJlbWVudC1wbGF0Zm9ybS11c2VycyIsImlzcyI6InByb2N1cmVtZW50LXBsYXRmb3JtIn0.HoCjI2UI7TSKAha36x7R_1YY5piMWTJmYOcUn2FcBw0"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"manager@techcorp.com\",\n  \"password\": \"ManagerPass123!\",\n  \"userType\": \"user\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login Vendor",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.to.have.status(200)) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('access_token', response.data.accessToken);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"sarah@supplier.com\",\n  \"password\": \"VendorPass123!\",\n  \"userType\": \"vendor\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/auth/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refreshToken\": \"your_refresh_token_here\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/refresh-token",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"refresh-token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/auth/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "RFP Requests",
+			"item": [
+				{
+					"name": "Create RFP Request",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.to.have.status(201)) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('rfp_request_id', response.data.rfpRequest._id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"New Laptops for Development Team\",\n  \"description\": \"We need 10 high-performance laptops for our development team to improve productivity\",\n  \"category\": \"Electronics\",\n  \"urgency\": \"high\",\n  \"specifications\": {\n    \"processor\": \"Intel i7 or AMD Ryzen 7\",\n    \"ram\": \"16GB minimum\",\n    \"storage\": \"512GB SSD\",\n    \"display\": \"15-inch minimum\",\n    \"os\": \"Windows 11 or macOS\"\n  },\n  \"quantity\": 10,\n  \"budgetEstimate\": 15000,\n  \"currency\": \"USD\",\n  \"justification\": \"Current laptops are 4 years old and affecting team productivity. New laptops will improve development speed and allow for better testing capabilities.\",\n  \"expectedDeliveryDate\": \"2024-12-15T00:00:00.000Z\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/rfp-requests",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rfp-requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get RFP Requests",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/rfp-requests?page=1&limit=10&sortBy=createdAt&sortOrder=desc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rfp-requests"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "sortBy",
+									"value": "createdAt"
+								},
+								{
+									"key": "sortOrder",
+									"value": "desc"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single RFP Request",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/rfp-requests/{{rfp_request_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rfp-requests",
+								"{{rfp_request_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update RFP Request",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Updated: New Laptops for Development Team\",\n  \"urgency\": \"urgent\",\n  \"budgetEstimate\": 18000,\n  \"justification\": \"Updated justification: Current laptops are failing and causing project delays. Urgent replacement needed.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/rfp-requests/{{rfp_request_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rfp-requests",
+								"{{rfp_request_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Review RFP Request (Manager)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"approved\",\n  \"managerNotes\": \"Request approved. Proceeding to market request creation for competitive bidding.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/rfp-requests/{{rfp_request_id}}/review",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rfp-requests",
+								"{{rfp_request_id}}",
+								"review"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete RFP Request",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/rfp-requests/{{rfp_request_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rfp-requests",
+								"{{rfp_request_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Market Requests",
+			"item": [
+				{
+					"name": "Create Market Request",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.to.have.status(201)) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('market_request_id', response.data.marketRequest._id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"RFQ: High-Performance Laptops for Development Team\",\n  \"description\": \"We are seeking quotes for 10 high-performance laptops for our software development team. Please provide detailed specifications and competitive pricing.\",\n  \"internalRequest\": \"{{rfp_request_id}}\",\n  \"specifications\": {\n    \"processor\": \"Intel i7 11th gen or AMD Ryzen 7 5000 series minimum\",\n    \"ram\": \"16GB DDR4 minimum (32GB preferred)\",\n    \"storage\": \"512GB NVMe SSD minimum (1TB preferred)\",\n    \"display\": \"15-17 inch, Full HD minimum\",\n    \"graphics\": \"Dedicated GPU preferred\",\n    \"ports\": \"USB-C, USB 3.0, HDMI\",\n    \"warranty\": \"3 years minimum\",\n    \"os\": \"Windows 11 Professional\"\n  },\n  \"quantity\": 10,\n  \"maxBudget\": 20000,\n  \"currency\": \"USD\",\n  \"deadline\": \"2024-11-30T23:59:59.000Z\",\n  \"deliveryLocation\": {\n    \"address\": \"123 Tech Street\",\n    \"city\": \"San Francisco\",\n    \"state\": \"CA\",\n    \"zipCode\": \"94105\",\n    \"country\": \"USA\",\n    \"contactPerson\": \"Mike Manager\",\n    \"contactPhone\": \"+1-555-0125\"\n  },\n  \"requirements\": [\n    {\n      \"title\": \"Warranty Documentation\",\n      \"description\": \"Provide warranty documentation and service center details\",\n      \"isMandatory\": true,\n      \"weight\": 20\n    },\n    {\n      \"title\": \"Technical Specifications\",\n      \"description\": \"Detailed technical specifications document\",\n      \"isMandatory\": true,\n      \"weight\": 30\n    }\n  ],\n  \"evaluationCriteria\": [\n    {\n      \"criterion\": \"Price Competitiveness\",\n      \"description\": \"Total cost including taxes and delivery\",\n      \"weight\": 40,\n      \"maxScore\": 100\n    },\n    {\n      \"criterion\": \"Technical Specifications\",\n      \"description\": \"Meeting or exceeding technical requirements\",\n      \"weight\": 35,\n      \"maxScore\": 100\n    },\n    {\n      \"criterion\": \"Delivery Timeline\",\n      \"description\": \"Proposed delivery schedule\",\n      \"weight\": 25,\n      \"maxScore\": 100\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/market-requests",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"market-requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Market Requests",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/market-requests?page=1&limit=10&status=open&sortBy=deadline&sortOrder=asc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"market-requests"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "status",
+									"value": "open"
+								},
+								{
+									"key": "sortBy",
+									"value": "deadline"
+								},
+								{
+									"key": "sortOrder",
+									"value": "asc"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Market Request",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/market-requests/{{market_request_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"market-requests",
+								"{{market_request_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Interest (Vendor)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"isInterested\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/market-requests/{{market_request_id}}/interest",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"market-requests",
+								"{{market_request_id}}",
+								"interest"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Market Request",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"maxBudget\": 22000,\n  \"deadline\": \"2024-12-15T23:59:59.000Z\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/market-requests/{{market_request_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"market-requests",
+								"{{market_request_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Close Market Request",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reason\": \"Requirements changed, need to create new request\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/market-requests/{{market_request_id}}/close",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"market-requests",
+								"{{market_request_id}}",
+								"close"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Award Market Request",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"proposalId\": \"{{proposal_id}}\",\n  \"managerNotes\": \"Best overall proposal with competitive pricing and excellent specifications.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/market-requests/{{market_request_id}}/award",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"market-requests",
+								"{{market_request_id}}",
+								"award"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Proposals",
+			"item": [
+				{
+					"name": "Create Proposal (Vendor)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.to.have.status(201)) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('proposal_id', response.data.proposal._id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"marketRequest\": \"{{market_request_id}}\",\n  \"proposedItem\": \"Dell XPS 15 Development Laptop Package\",\n  \"description\": \"Premium laptop package specifically configured for software development with high-performance specifications and extended warranty.\",\n  \"specifications\": {\n    \"model\": \"Dell XPS 15 9520\",\n    \"processor\": \"Intel Core i7-12700H (14-Core, 24MB Cache, up to 4.7 GHz)\",\n    \"ram\": \"32GB DDR5-4800MHz\",\n    \"storage\": \"1TB M.2 PCIe NVMe SSD\",\n    \"display\": \"15.6-inch OLED 3.5K (3456x2160) Touch Display\",\n    \"graphics\": \"NVIDIA GeForce RTX 3050 Ti 4GB GDDR6\",\n    \"ports\": \"2x USB-C Thunderbolt 4, 1x USB 3.2 Gen 2, 1x HDMI 2.0, 1x SD card reader\",\n    \"battery\": \"86Wh Battery\",\n    \"weight\": \"4.22 lbs\",\n    \"os\": \"Windows 11 Professional\",\n    \"keyboard\": \"Backlit English Keyboard\"\n  },\n  \"quantity\": 10,\n  \"unitPrice\": 1899,\n  \"currency\": \"USD\",\n  \"deliveryTime\": \"7-10 business days\",\n  \"deliveryDate\": \"2024-12-10T00:00:00.000Z\",\n  \"warranty\": \"3-year Premium Support Plus with on-site service and accidental damage protection\",\n  \"additionalServices\": [\n    \"Free setup and configuration\",\n    \"Data migration from old laptops\",\n    \"24/7 technical support hotline\",\n    \"Training session for IT team\"\n  ],\n  \"complianceDocuments\": [\n    {\n      \"requirement\": \"Warranty Documentation\",\n      \"documentName\": \"Dell Premium Support Plus Agreement\",\n      \"documentUrl\": \"https://example.com/warranty-doc.pdf\",\n      \"isCompliant\": true,\n      \"notes\": \"3-year comprehensive warranty with on-site support included\"\n    },\n    {\n      \"requirement\": \"Technical Specifications\",\n      \"documentName\": \"Dell XPS 15 Technical Specifications\",\n      \"documentUrl\": \"https://example.com/tech-specs.pdf\",\n      \"isCompliant\": true,\n      \"notes\": \"All technical requirements met or exceeded\"\n    }\n  ],\n  \"vendorNotes\": \"We are offering our best pricing for this bulk order. All laptops will be configured and tested before delivery. We can also provide extended payment terms if needed.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/proposals",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"proposals"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Proposals",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/proposals?page=1&limit=10&sortBy=createdAt&sortOrder=desc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"proposals"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "sortBy",
+									"value": "createdAt"
+								},
+								{
+									"key": "sortOrder",
+									"value": "desc"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Proposal",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/proposals/{{proposal_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"proposals",
+								"{{proposal_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Proposal (Vendor)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"unitPrice\": 1799,\n  \"deliveryTime\": \"5-7 business days\",\n  \"vendorNotes\": \"Updated pricing with 5% discount for bulk order. Faster delivery available.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/proposals/{{proposal_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"proposals",
+								"{{proposal_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Submit Proposal (Vendor)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/proposals/{{proposal_id}}/submit",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"proposals",
+								"{{proposal_id}}",
+								"submit"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Withdraw Proposal (Vendor)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reason\": \"Unable to meet delivery timeline due to supply chain issues\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/proposals/{{proposal_id}}/withdraw",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"proposals",
+								"{{proposal_id}}",
+								"withdraw"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Evaluate Proposal (Manager)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"scores\": [\n    {\n      \"criterion\": \"Price Competitiveness\",\n      \"score\": 85,\n      \"maxScore\": 100,\n      \"notes\": \"Competitive pricing with good value for specifications\"\n    },\n    {\n      \"criterion\": \"Technical Specifications\",\n      \"score\": 95,\n      \"maxScore\": 100,\n      \"notes\": \"Exceeds all technical requirements with premium components\"\n    },\n    {\n      \"criterion\": \"Delivery Timeline\",\n      \"score\": 90,\n      \"maxScore\": 100,\n      \"notes\": \"Fast delivery timeline within required timeframe\"\n    }\n  ],\n  \"overallNotes\": \"Excellent proposal with high-quality specifications and competitive pricing. Vendor demonstrates strong capability to deliver.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/proposals/{{proposal_id}}/evaluate",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"proposals",
+								"{{proposal_id}}",
+								"evaluate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Accept Proposal (Manager)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"managerNotes\": \"Proposal accepted. Please proceed with order processing and delivery arrangements.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/proposals/{{proposal_id}}/accept",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"proposals",
+								"{{proposal_id}}",
+								"accept"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reject Proposal (Manager)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"rejectionReason\": \"Price exceeds budget constraints\",\n  \"managerNotes\": \"Thank you for your proposal. Unfortunately, the pricing exceeds our allocated budget for this procurement.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/proposals/{{proposal_id}}/reject",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"proposals",
+								"{{proposal_id}}",
+								"reject"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Proposal (Vendor)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/proposals/{{proposal_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"proposals",
+								"{{proposal_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Vendors",
+			"item": [
+				{
+					"name": "Get All Vendors",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/vendors?page=1&limit=10&sortBy=firstName&sortOrder=asc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"vendors"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "sortBy",
+									"value": "firstName"
+								},
+								{
+									"key": "sortOrder",
+									"value": "asc"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Vendor Dashboard (Vendor Only)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/vendors/dashboard",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"vendors",
+								"dashboard"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Vendor Proposals (Vendor Only)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/vendors/proposals?page=1&limit=10&status=submitted",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"vendors",
+								"proposals"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "status",
+									"value": "submitted"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Vendor",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/vendors/{{vendor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"vendors",
+								"{{vendor_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Vendor Profile (Vendor Only)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Sarah\",\n  \"lastName\": \"UpdatedVendor\",\n  \"phone\": \"+1-555-0201\",\n  \"specialization\": [\"Electronics\", \"Hardware\", \"Software\"],\n  \"location\": \"New York, NY\",\n  \"portfolio\": \"Updated: Specialized in high-quality electronic components, hardware solutions, and software licensing with 6+ years experience.\",\n  \"description\": \"6+ years experience in B2B technology supply with focus on enterprise solutions\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/vendors/{{vendor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"vendors",
+								"{{vendor_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Get All Users (Admin Only)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/users?page=1&limit=10&role=manager&sortBy=firstName&sortOrder=asc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "role",
+									"value": "manager"
+								},
+								{
+									"key": "sortBy",
+									"value": "firstName"
+								},
+								{
+									"key": "sortOrder",
+									"value": "asc"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{user_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User (Admin Only)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"role\": \"manager\",\n  \"isActive\": true,\n  \"department\": \"Procurement Management\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{user_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deactivate User (Admin Only)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/users/{{user_id}}/deactivate",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{user_id}}",
+								"deactivate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Users by Organization",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/users/organization/{{organization_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"organization",
+								"{{organization_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "AI",
+			"item": [
+				{
+					"name": "Trigger AI Evaluation for Proposal",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "get Evaluation Results",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "AI-Powered Proposal Comparison",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Vendor Performance Insights",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Market Request Analysis",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Executive Summary",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Batch Evaluate Proposals",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080/api"
+		},
+		{
+			"key": "access_token",
+			"value": ""
+		},
+		{
+			"key": "organization_id",
+			"value": ""
+		},
+		{
+			"key": "user_id",
+			"value": ""
+		},
+		{
+			"key": "vendor_id",
+			"value": ""
+		},
+		{
+			"key": "rfp_request_id",
+			"value": ""
+		},
+		{
+			"key": "market_request_id",
+			"value": ""
+		},
+		{
+			"key": "proposal_id",
+			"value": ""
+		},
+		{
+			"key": "vendor_access_token",
+			"value": ""
+		}
+	]
+}
