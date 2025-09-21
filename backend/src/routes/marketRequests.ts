@@ -19,11 +19,9 @@ import {
 
 const router = Router();
 
-// All routes require authentication
-router.use(authenticate);
 
 // Create market request (managers/admins only)
-router.post('/', validate(createMarketRequestSchema), createMarketRequest);
+router.post('/', authenticate, validate(createMarketRequestSchema), createMarketRequest);
 
 // Get market requests (public for vendors, filtered for org users)
 router.get('/', validateQuery(paginationSchema), getMarketRequests);
@@ -42,9 +40,9 @@ router.put('/:id',
 );
 
 // Close market request (creators only)
-router.patch('/:id/close', validateParams(mongoIdParamSchema), closeMarketRequest);
+router.patch('/:id/close',authenticate, validateParams(mongoIdParamSchema), closeMarketRequest);
 
 // Award market request (creators only)
-router.patch('/:id/award', validateParams(mongoIdParamSchema), awardMarketRequest);
+router.patch('/:id/award',authenticate, validateParams(mongoIdParamSchema), awardMarketRequest);
 
 export default router;

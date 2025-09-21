@@ -113,24 +113,25 @@ export const getMarketRequests = asyncHandler(async (req: Request, res: Response
     sortOrder = 'desc',
   } = req.query;
 
-  const userType = req.user!.userType;
-  const userId = req.user!.userId;
-
+  const user = req.user;
   let filter: any = {};
 
-  if (userType === 'vendor') {
+  if (!user) {
+    // Public access - only show open market requests
+    filter.status = 'open';
+  } else if (user.userType === 'vendor') {
     // Vendors can see all open market requests
     filter.status = 'open';
   } else {
     // Organization users can see market requests from their organization
-    const user = await User.findById(userId);
-    if (user) {
-      filter.organization = user.organization;
+    const userDoc = await User.findById(user.userId);
+    if (userDoc) {
+      filter.organization = userDoc.organization;
     }
   }
 
   // Add additional filters
-  if (status && userType !== 'vendor') filter.status = status;
+  if (status && (!user || user.userType !== 'vendor')) filter.status = status;
   if (category) filter.category = category;
   if (maxBudget) filter.maxBudget = { $lte: parseInt(maxBudget as string) };
 
@@ -145,7 +146,7 @@ export const getMarketRequests = asyncHandler(async (req: Request, res: Response
     MarketRequest.find(filter)
       .populate('createdBy', 'firstName lastName')
       .populate('organization', 'name')
-      .select(userType === 'vendor' ? '-interestedVendors' : '')
+      .select((!user || user.userType === 'vendor') ? '-interestedVendors' : '')
       .sort(sortOptions)
       .skip(skip)
       .limit(limitNum),
@@ -169,12 +170,11 @@ export const getMarketRequests = asyncHandler(async (req: Request, res: Response
 // Get single market request
 export const getMarketRequest = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const userType = req.user!.userType;
-  const userId = req.user!.userId;
+  const user = req.user;
 
   let selectFields = '';
-  if (userType === 'vendor') {
-    // Vendors can't see interested vendors list
+  if (!user || user.userType === 'vendor') {
+    // Public users and vendors can't see interested vendors list
     selectFields = '-interestedVendors';
   }
 
@@ -192,15 +192,15 @@ export const getMarketRequest = asyncHandler(async (req: Request, res: Response)
   }
 
   // Check if vendor has viewed this request before
-  if (userType === 'vendor' && request.status === 'open') {
+  if (user && user.userType === 'vendor' && request.status === 'open') {
     const vendorViewed = request.interestedVendors.some(
-      (vendor: any) => vendor.vendor.toString() === userId
+      (vendor: any) => vendor.vendor.toString() === user.userId
     );
 
     if (!vendorViewed) {
       // Add vendor to interested list and increment views
       request.interestedVendors.push({
-        vendor: new mongoose.Types.ObjectId(userId),
+        vendor: new mongoose.Types.ObjectId(user.userId),
         viewedAt: new Date(),
         isInterested: false,
       });
